@@ -14,6 +14,13 @@ def clear():
 
 clear()
 
+flipou = False
+
+def mod(a, b):
+    r = a % b
+    if r<0: r= abs(b) + r
+    return r
+
 def ler_inteiro(msg, msg_erro="Erro! Digite um número inteiro: ", min=None):
     print(msg, end="")
 
@@ -78,67 +85,97 @@ def substituir(eq1, eq2):
             eq2.dir[key] = value * acompanhaAsubs
 
 def calculaEquacoes(a, b, c):
-    if a<0: a=-a
-    if b<0: b=-b
 
-    if b == 0: a, b = b, a
+    if b == 0 or abs(a) > abs(b):
+        a, b = b, a
 
     equacoes = []
 
     while True:
 
         q = int(a / b)
-        r = a % b
+        # r = mod(a, b)
+        r = round((a/b - q) * b)
 
-        # print(f"{a} = {b} * {q} + {r}")
+        if r<0:
+            r += b
+            q -= 1
+
+        # print(f"og {a} = {b} * {q} + {r}")
         if r == 0:
+            # print("")
             return equacoes
 
         # já salva com resto isolado: r = a + b *(-q)
         equacoes.append(Eq({r:1}, {a:1, b:-q}))
 
         a,b = b,r
+    
 
-def resolveDiofantina(a, b, c):
+def resolveDiofantina(a, b, c, printar=True):
+    global flipou
+    flipou = False
+
+    if a<0 and b<0:
+        flipou = True
+        a, b, c = -a, -b, -c
 
     equacoes = calculaEquacoes(a, b, c)
 
-    print(f"equação: {a}*x + {b}*y = {c}\n")
-    # print("todas as equacoes")
     # for e in equacoes:
     #     e.mostrar()
+
     eqPrincipal = equacoes.pop(len(equacoes)-1)
     mdc = list(eqPrincipal.esq.keys())[0]
 
-    if c % mdc != 0:
-        print(f"essa equação não tem solução pois mdc({a},{b}) = {mdc}, e {mdc} não divide {c}")
+    if flipou: a, b, c = -a, -b, -c
+
+    if printar: print(f"equação: {a}*x + {b}*y = {c}\n")
+
+    if mod(c, mdc) != 0:
+        if printar: print(f"essa equação não tem solução pois mdc({a},{b}) = {mdc}, e {mdc} não divide {c}")
         return None
     else:
-        print(f"essa equação tem solução pois mdc({a},{b}) = {mdc}, e {mdc} | {c}\n")
+        if printar: print(f"essa equação tem solução pois mdc({a},{b}) = {mdc}, e {mdc} | {c}\n")
     
+    if flipou: a, b, c = -a, -b, -c
     
+    # print("substituindo")
     for i in range(1, len(equacoes)+1):
         eq = equacoes[len(equacoes) - i]
         substituir(eq, eqPrincipal)
+    
+    #     eqPrincipal.mostrar()
+    # print("")
     
     eqPrincipal.mult(int(c/mdc))
 
     x = eqPrincipal.dir[a]
     y = eqPrincipal.dir[b]
+
+    if flipou: a, b, c = -a, -b, -c
+
+    if a*x + b*y != c:
+        if printar: print(f"erro, a sol. x = {x}, y = {y} não resolve a equação")
+        return False
+
+    if printar:
+        
+        print(f"solução particular: x0 = {x}, y0 = {y}\n")
+
+        sinal = '+' if int(a/mdc) < 0 else '-'
+        print(f"equação da solução geral")
+        print(f"x = {x} + {int(b/mdc)} * t")
+        print(f"y = {y} {sinal} {abs(int(a/mdc))} * t")
+
+        print("\ncom base na sol. geral, aqui uns exemplos")
+        for t in range(1, 4):
+            xt = x + int(b/mdc) * t
+            yt = y - int(a/mdc) * t
+            print(f"t={t}:  x = {xt}, y = {yt} -> {a}({xt}) + ({b})({yt}) = {a*xt} + ({b*yt}) = {a*xt + b*yt}")
+
+    return True
     
-    print(f"solução particular: x = {x}, y = {y}\n")
-
-    print(f"equação da solução geral")
-    print(f"x = {x} + {int(b/mdc)} * t")
-    print(f"y = {y} - {int(a/mdc)} * t")
-
-    print("\ncom base na sol. geral, aqui uns exemplos")
-    for t in range(1, 6):
-        xt = x + int(b/mdc) * t
-        yt = y - int(a/mdc) * t
-
-        print(f"t={t}:  x = {xt}, y = {yt}")
-
 
 if __name__ == '__main__':
     print("formato da equação: ax + by = c\n")

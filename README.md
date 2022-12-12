@@ -9,6 +9,13 @@ Integrantes
 Uma equação linear Diofantina é uma equação entre duas somas de monômios de grau zero ou um, permite a duas ou mais variáveis assumirem apenas valores inteiros. (fonte: [wikipédia](https://pt.wikipedia.org/wiki/Equa%C3%A7%C3%A3o_diofantina))
 
 Esse programa resolve uma eq. com a forma geral ax + by = c.
+
 ex: 4x + 2y = 1
 
+# Rodando o programa
+
+Execute o comando abaixo em um terminal linux
+```
+python3 diofantina.py
+```
 
